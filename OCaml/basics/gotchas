@@ -1,0 +1,8 @@
+A function with no arguments is not
+	print_newline;;
+but rather
+	print_newline () ;;
+---------------- 
+remember the None and Some pattern from the option.ml instead of letting exceptions go through.
+---------------- 
+
