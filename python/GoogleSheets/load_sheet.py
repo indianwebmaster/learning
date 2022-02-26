@@ -1,58 +1,82 @@
-# This Google Authentication mechanism has been deprecated (Manoj: 05/20/2017)
-import re
-import urllib
-import urllib2
+# Tutorial Used: https://developers.google.com/sheets/api/quickstart/python
+# -------------------------------------------------------------------------
+from __future__ import print_function
+import httplib2
+import os
+import argparse
 
-class Spreadsheet(object):
-    def __init__(self, key):
-        super (Spreadsheet, self).__init__()
-        self.key = key
+from apiclient import discovery
+from oauth2client import client
+from oauth2client import tools
+from oauth2client.file import Storage
 
+try:
+    flags = argparse.ArgumentParser(parents=[tools.argparser]).parse_args()
+except ImportError:
+    flags = None
 
-class Client(object):
-    def __init__(self, email, password):
-        super (Client, self).__init__()
-        self.email = email
-        self.password = password
-
-    def _get_auth_token(self, email, password, source, service):
-        url = "https://www.google.com/accounts/ClientLogin"
-        params = {
-            "Email": email,
-            "Password": password,
-            "service": service,
-            "accountType": "HOSTED_OR_GOOGLE",
-            "source":source
-        }
-        req = urllib2.Request(url, urllib.urlencode(params))
-        return re.findall(r"Auth=(.*)", urllib2.urlopen(req).read())[0]
-
-    def get_auth_token(self):
-        source = type(self).__name__
-        return self._get_auth_token(self.email, self.password, source, service="wise")
-
-    def download(self,spreadsheet, gid=0, format="csv"):
-        url_format = "https://spreadsheets.google.com/feeds/download/spreadsheets/Export?key=%s&exportFormat=%s&gid=%i"
-        headers = {
-            "Authorization": "GoogleLogin auth=" + self.get_auth_token(),
-            "GData-Version": "3.0"
-        }
-        req = urllib2.Request(url_format % (spreadsheet.key, format, gid), headers=headers)
-        return urllib2.urlopen(req)
+# If modifying these scopes, delete your previously saved credentials
+# at ~/.credentials/sheets.googleapis.com-python-quickstart.json
+SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly'
+# The client_secret file is not in GIT. Get it from dropbox
+CLIENT_SECRET_FILE = 'client_secret/client_secret.json'
+APPLICATION_NAME = 'ITAVolunteer Google Sheets API Python'
 
 
-if __name__ == "__main__":
-    import getpass
-    import csv
+def get_credentials():
+    """Gets valid user credentials from storage.
 
-    email="itacolunteer@gmail.com"
-    password = getpass.getpass()
-    spreadsheet_id = "1X9KszJu6WheUmIcKHAlt8tqAlNtaO4ocD9Mna3xeUDw"
+    If nothing has been stored, or if the stored credentials are invalid,
+    the OAuth2 flow is completed to obtain the new credentials.
 
-    gs = Client(email, password)
-    ss = Spreadsheet(spreadsheet_id)
+    Returns:
+        Credentials, the obtained credential.
+    """
+    home_dir = os.path.expanduser('~')
+    credential_dir = os.path.join(home_dir, '.credentials')
+    if not os.path.exists(credential_dir):
+        os.makedirs(credential_dir)
+    credential_path = os.path.join(credential_dir,
+                                   'sheets.googleapis.com-python-quickstart.json')
 
-    csv_file = gs.download(ss)
+    store = Storage(credential_path)
+    credentials = store.get()
+    if not credentials or credentials.invalid:
+        flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES)
+        flow.user_agent = APPLICATION_NAME
+        if flags:
+            credentials = tools.run_flow(flow, store, flags)
+        else: # Needed only for compatibility with Python 2.6
+            credentials = tools.run(flow, store)
+        print('Storing credentials to ' + credential_path)
+    return credentials
 
-    for row in csv.reader(csv_file):
-        print ", ".join(row)
+
+def main():
+    """Shows basic usage of the Sheets API.
+
+    Creates a Sheets API service object and prints the names and majors of
+    students in a sample spreadsheet:
+    https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
+    """
+    credentials = get_credentials()
+    http = credentials.authorize(httplib2.Http())
+    discoveryUrl = ('https://sheets.googleapis.com/$discovery/rest?version=v4')
+    service = discovery.build('sheets', 'v4', http=http, discoveryServiceUrl=discoveryUrl)
+
+    spreadsheetId = '1X9KszJu6WheUmIcKHAlt8tqAlNtaO4ocD9Mna3xeUDw'
+    rangeName = 'Form Responses 1!A2:O'
+    result = service.spreadsheets().values().get( spreadsheetId=spreadsheetId, range=rangeName).execute()
+    values = result.get('values', [])
+
+    if not values:
+        print('No data found.')
+    else:
+        print('Timestamp, Full Name:')
+        for row in values:
+            # Print columns A and O, which correspond to indices 0 and 1.
+            print('%s, %s' % (row[0], row[1]))
+
+
+if __name__ == '__main__':
+    main()
