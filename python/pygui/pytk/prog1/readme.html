@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>tkinter Notes</title>
+</head>
+<body>
+<h1>tkinter notes</h1>
+<h2>Widget Names</h2>
+In Tcl/Tk, a button is defined as <i>button .dialog.ok</i> where the name of the button widget is
+<i>ok</i> and is defined to be a child of the <i>dialog</i> widget.
+<p/>The equivalent of that in tkinter is <i>ok = Button(dialog)</i>. Now, while this creates the button
+widget, in a pure Tk terms, the button reference name is not <i>.dialog.ok</i>, but rather an internal name
+given by tkinter <i>.13423349.12333423</i> (all digits). If there is a <i>need</i> to give a specific
+name to a tk widget, you have to use the "name" attribute during creation, as <i>ok = Button(dialog, name="ok")</i>.
+This will create the widget name as <i>.13423349.ok</i> (unless you gave a name to dialog too).
+<p/>Why you would want to do that .... if you want to access the Tk code and do some manipulation.
+How can you access the Tk code .... good question. Don't know as yet.
+
+<h2>Widget Geometry</h2>
+As in Tcl/Tk, there are three geometry options. Grid, Pack and Place.
+<h3>Grid</h3>
+The grid geometry manager allows you to create table like layouts, by organizing the widgets in a
+two dimensional grid. To use this geometry manager, use the grid method. e.g.
+<p/><pre>
+    b = button(text="Close")
+    b.grid(........) # For arguments, see details on Grid
+</pre>
+<h3>Pack</h3>
+The pack grometry manager lets you create a layout by packing the widgets into a parent widget, by treating
+them as rectangular blocks placed in a frame. To use this geometry manager for a widget, use the pack method
+on that widget to set things up. e.g.
+<p/><pre>
+    b = button(text="Close")
+    b.pack(........) # For arguments, see details on Pack
+</pre>
+<h3>Place</h3>
+The place geometry manager lets you explicitly place a widget in a given position. To use this geometry
+manager, use the place method. e.g.
+<p/><pre>
+    b = button(text="Close")
+    b.place(........) # For arguments, see details on Place
+</pre>
+
+<h2>Standard Widget Configuration interface</h2>
+All core widgets implement the same configuration interface. To control the appearance of a widget,
+you usually use options (such as text, color, size, command callbacks etc.) rather than method calls.
+
+<ol>
+    <li>widget = widgetclass(master, option=value)</li>
+    where <i>widgetclass</i> is one of the widget classes as Button, Frame etc.
+    <p>The widget would be created as a child to the given master. All options have default values,
+    so in the simplest case, you only have to specify the master. If you leave out the master, tkinter
+    uses the most recently created root window as the master.</p>
+
+    <li>optval = cget("option")</li>Returns the value of an option as a string.<p></p>
+
+    <li>config(option=value,...) or configure(option=value,...)</li> Set one or more options.
+    <p>Alternatively, instead of the cget() and configure() options, you can use the following
+    <pre>
+        optval = widget["option"]  # In place of cget()
+        widget["option"] = value   # In place of config()
+    </pre>
+    However, config() allows the ability to change multiple options in one shot, and thus is preferred.</p>
+
+    <li>optionList = keys() </li> Return a list of all options that can be set for this widget.<p></p>
+</ol>
+
+<h2>Widgets</h2>
+<table>
+    <tr>
+        <td>Button</td><td>A Simple Button</td><td>b = Button(master,text="Ok",command=callback</td>
+        <td>Canvas</td><td>General purpose widget typically used to display & edit graphs & drawings</td>
+            <td><pre>
+                w = Canvas(master, width=200, height=100)
+                w.pack()
+
+                l_1 = w.create_line(0, 0, 200, 100)
+                l_2 = w.create_line(0, 100, 200, 0, fill="red", dash=(4,4))
+
+                r_1 = w.create_rectangle(50,25,150,75,fill="blue")
+
+                mainloop()
+
+                w.delete(l_2)
+                w.delete(ALL)
+                <table>
+                    <tr><td>Canvas widgets</td></tr>
+                    <tr><td>arc</td></tr>
+                    <tr><td>bitmap</td></tr>
+                    <tr><td>image</td></tr>
+                    <tr><td>line</td></tr>
+                    <tr><td>oval</td></tr>
+                    <tr><td>polygon</td></tr>
+                    <tr><td>text</td></tr>
+                    <tr><td>window</td></tr>
+                </table>
+            </pre></td>
+    </tr>
+    <tr>
+        <td>Checkbutton</td><td>Represents a variable that can have 2 distinct values</td><td>c = Checkbutton(master, text="Expand", variable=var)</td>
+    </tr>
+</table>
+<h2>Colors</h2>
+Options available are <b><i>background</i></b> and <b><i>foreground</i></b>.
+<p>Colors can be specified in the format <b><i>#RRGGBB</i></b> or <b><i>#RRRRGGGGBBBB</i></b> (65536 colors)</p>
+<br/>The following window system colors can be changed.
+<table>
+    <tr>
+        <td bgcolor="lightgreen">Item</td><td bgcolor="lightblue">Windows</td><td bgcolor="pink">Macintosh</td>
+    </tr>
+    <tr bgcolor="lightblue">
+        <td>SystemActiveBorder</td><td>Yes</td><td>No</td>
+    </tr>
+    <tr bgcolor="lightblue">
+        <td>SystemActiveCaption</td><td>Yes</td><td>No</td>
+    </tr>
+    <tr bgcolor="lightblue">
+        <td>SystemAppWorkspace</td><td>Yes</td><td>No</td>
+    </tr>
+    <tr bgcolor="lightblue">
+        <td>SystemBackground</td><td>Yes</td><td>No</td>
+    </tr>
+    <tr bgcolor="lightgreen">
+        <td>SystemButtonFace</td><td>Yes</td><td>Yes</td>
+    </tr>
+    <tr bgcolor="pink">
+        <td>SystemButtonFrame</td><td>No</td><td>Yes</td>
+    </tr>
+    <tr bgcolor="lightblue">
+        <td>SystemButtonHighlight</td><td>Yes</td><td>No</td>
+    </tr>
+    <tr bgcolor="lightblue">
+        <td>SystemButtonShadow</td><td>Yes</td><td>No</td>
+    </tr>
+    <tr bgcolor="lightgreen">
+        <td>SystemButtonText</td><td>Yes</td><td>Yes</td>
+    </tr>
+    <tr bgcolor="lightblue">
+        <td>SystemCaptionText</td><td>Yes</td><td>No</td>
+    </tr>
+    <tr bgcolor="lightblue">
+        <td>SystemDisabledText</td><td>Yes</td><td>No</td>
+    </tr>
+    <tr bgcolor="lightgreen">
+        <td>SystemHighlight</td><td>Yes</td><td>Yes</td>
+    </tr>
+    <tr bgcolor="lightgreen">
+        <td>SystemHighlightText</td><td>Yes</td><td>Yes</td>
+    </tr>
+    <tr bgcolor="lightblue">
+        <td>SystemInactiveBorder</td><td>Yes</td><td>No</td>
+    </tr>
+    <tr bgcolor="lightblue">
+        <td>SystemInactiveCaption</td><td>Yes</td><td>No</td>
+    </tr>
+    <tr bgcolor="lightblue">
+        <td>SystemInactiveCaptionText</td><td>Yes</td><td>No</td>
+    </tr>
+    <tr bgcolor="lightgreen">
+        <td>SystemMenu</td><td>Yes</td><td>Yes</td>
+    </tr>
+    <tr bgcolor="pink">
+        <td>SystemMenuActive</td><td>No</td><td>Yes</td>
+    </tr>
+    <tr bgcolor="pink">
+        <td>SystemMenuActiveText</td><td>No</td><td>Yes</td>
+    </tr>
+    <tr bgcolor="pink">
+        <td>SystemMenuDisabled</td><td>No</td><td>Yes</td>
+    </tr>
+    <tr bgcolor="lightgreen">
+        <td>SystemMenuText</td><td>Yes</td><td>Yes</td>
+    </tr>
+    <tr bgcolor="lightblue">
+        <td>SystemScrollbar</td><td>Yes</td><td>No</td>
+    </tr>
+    <tr bgcolor="lightblue">
+        <td>SystemWindow</td><td>Yes</td><td>No</td>
+    </tr>
+    <tr bgcolor="pink">
+        <td>SystemWindowBody</td><td>No</td><td>Yes</td>
+    </tr>
+    <tr bgcolor="lightblue">
+        <td>SystemWindowFrame</td><td>Yes</td><td>No</td>
+    </tr>
+    <tr bgcolor="lightblue">
+        <td>SystemWindowText</td><td>Yes</td><td>No</td>
+    </tr>
+</table>
+
+
+</body>
+</html>
